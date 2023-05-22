@@ -12,17 +12,15 @@ type
     btnReload: TButton;
     tmrKill: TTimer;
     tmrLoadParams: TTimer;
-    tmrUpdate: TTimer;
     procedure btnReloadClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure tmrKillTimer(Sender: TObject);
     procedure tmrLoadParamsTimer(Sender: TObject);
-    procedure tmrUpdateTimer(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     AllowedTime: TDateTime;
-    ExeName: String;
-    ExeTitle: string;
+    ExeNames: TStrings;
+    ExeTitles: TStrings;
     TabsToClose: TStringList;
     FAppVersion: string;
     FNewVersion: string;
@@ -39,7 +37,6 @@ type
 
 var
   MainForm: TMainForm;
-
 
 implementation
 
@@ -142,6 +139,8 @@ procedure TMainForm.FormCreate(Sender: TObject);
 begin
   FAppVersion := GetVersionAsString;
   TabsToClose := TStringList.Create;
+  ExeNames    := TStringList.Create;
+  ExeTitles   := TStringList.Create;
   LoadParams;
 end;
 
@@ -190,12 +189,14 @@ procedure TMainForm.LoadParams(ASilent: Boolean = True);
       end;
     end;
   end;
-  procedure LFillTabsToClose(AStrings: TStringList);
+  procedure LFillTabsAndExeToClose(AStrings: TStringList);
   var
     i: Integer;
     lTabsStarted: Boolean;
   begin
     TabsToClose.Clear;
+    ExeNames.Clear;
+    ExeTitles.Clear;
     lTabsStarted := False;
     for i := 0 to AStrings.Count - 1 do
     begin
@@ -209,8 +210,17 @@ procedure TMainForm.LoadParams(ASilent: Boolean = True);
         lTabsStarted := True;
         Continue; // skip this line
       end;
-      if not lTabsStarted then
+      if not lTabsStarted then // fill Exe's
+      begin
+        if (AStrings[i] > '') then
+        begin
+          if (RightStr(AStrings[i], 4) = '.exe') then
+            ExeNames.Add(AStrings[i])
+          else
+            ExeTitles.Add(AStrings[i]);
+        end;
         Continue;
+      end;
       TabsToClose.Add(AStrings[i]);
     end;
   end;
@@ -226,12 +236,8 @@ begin
   lStrings := TStringList.Create;
   try
     lStrings.Text := lReply;
-    if lStrings.Count > 1 then
-       ExeName := lStrings[1];
-    if lStrings.Count > 2 then
-       ExeTitle := lStrings[2];
 
-    LFillTabsToClose(lStrings);
+    LFillTabsAndExeToClose(lStrings);
     LGetNewVersionInfo(lStrings);
   finally
     FreeAndNil(lStrings);
@@ -278,8 +284,10 @@ begin
 
   if Now > AllowedTime then
   begin
-    KillTask(ExeName);
-    KillTaskByTitle(ExeTitle);
+//    KillTask(ExeName);
+//    KillTaskByTitle(ExeTitle);
+    KillTasks(ExeNames);
+    KillTasksByTitle(ExeTitles);
     CloseChromeTab;
   end;
 end;
@@ -292,12 +300,6 @@ begin
     DownloadFile(C_UPDATE_SOURCE);
     ReplaceFile;
   end;
-end;
-
-procedure TMainForm.tmrUpdateTimer(Sender: TObject);
-begin
-  DownloadFile(C_UPDATE_SOURCE);
-  ReplaceFile;
 end;
 
 end.

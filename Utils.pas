@@ -1,12 +1,16 @@
 unit Utils;
 
 interface
+uses Classes;
+
 function GetVersionInt: Integer;
 function GetVersionAsString: string;
 procedure SendCloseKey;
 procedure Play5minSound;
 procedure KillTaskByTitle(FileCaption: string);
 function KillTask(ExeFileName: string): Integer;
+procedure KillTasks(AExeFileNames: TStrings);
+procedure KillTasksByTitle(AFileCaptions: TStrings);
 
 
 implementation
@@ -124,6 +128,26 @@ begin
      ContinueLoop := Process32Next(FSnapshotHandle, FProcessEntry32);
   end;
   CloseHandle(FSnapshotHandle);
+end;
+
+procedure KillTasks(AExeFileNames: TStrings);
+var
+  i: Integer;
+begin
+  for i := 0 to AExeFileNames.Count - 1 do
+  begin
+    KillTask(AExeFileNames[i]);
+  end;
+end;
+
+procedure KillTasksByTitle(AFileCaptions: TStrings);
+var
+  i: Integer;
+begin
+  for i := 0 to AFileCaptions.Count - 1 do
+  begin
+    KillTaskByTitle(AFileCaptions[i]);
+  end;
 end;
 
 end.

@@ -36,10 +36,4 @@ object MainForm: TMainForm
     Left = 32
     Top = 56
   end
-  object tmrUpdate: TTimer
-    Interval = 3600000
-    OnTimer = tmrUpdateTimer
-    Left = 32
-    Top = 112
-  end
 end
