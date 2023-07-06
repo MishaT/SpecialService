@@ -1,14 +1,32 @@
-2023-05-17 18:49
+2023-07-03 19:50
 hollow_knight.exe
 Hollow Knight
 isaac-ng.exe
 Binding of Isaac: Repentance
-
+_teamwebhelper.exe
+_team Client WebHelper
 
 -- Chrome Tabs below --
 YouTube - Google Chrome
 EvoWorld.io
 stabfish.io
+warcall.io
 mope
 
--- AppVersion:1.0.0.9
+-- Apps to close --
+hollow_knight.exe
+Hollow Knight
+isaac-ng.exe
+Binding of Isaac: Repentance
+_teamwebhelper.exe
+_team Client WebHelper
+
+-- Apps to minimize --
+Untitled - Notepad
+something.app
+
+-- Services to stop --
+abcd
+qwerty
+
+-- AppVersion:1.0.0.11
