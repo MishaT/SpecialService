@@ -11,12 +11,15 @@ procedure KillTaskByTitle(FileCaption: string);
 function KillTask(ExeFileName: string): Integer;
 procedure KillTasks(AExeFileNames: TStrings);
 procedure KillTasksByTitle(AFileCaptions: TStrings);
+procedure MinimizeAppByTitle(AFileTitleName: string);
+//procedure StopOneService(AServiceName: string);
+procedure StopServices(AServiceNames: TStrings);
 
 
 implementation
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, MMSystem, Constants, Tlhelp32;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, MMSystem, Constants, Tlhelp32, ShellApi;
 
 
 procedure GetVersionInfo(var V1, V2, V3, V4: word);
@@ -148,6 +151,34 @@ begin
   begin
     KillTaskByTitle(AFileCaptions[i]);
   end;
+end;
+
+procedure MinimizeAppByTitle(AFileTitleName: string);
+var
+  H: HWND;
+begin //ExeFileName = caption or cmd path
+  H := FindWindow(nil, LPCWSTR(AFileTitleName));
+  if H <> 0 then
+    ShowWindow(H, SW_MINIMIZE);
+end;
+
+procedure StopOneService(AServiceName: string);
+var
+  cmd: String;
+begin
+  cmd := '/c sc stop "' + AServiceName + '"';
+  ShellExecute(0, 'open', PChar('cmd.exe'), PChar(cmd), nil, SW_HIDE);
+end;
+
+procedure StopServices(AServiceNames: TStrings);
+var
+  i: Integer;
+begin
+  for i := 0 to AServiceNames.Count - 1 do
+  begin
+    StopOneService(AServiceNames[i]);
+  end;
+
 end;
 
 end.

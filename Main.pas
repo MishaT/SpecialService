@@ -22,6 +22,8 @@ type
     ExeNames: TStrings;
     ExeTitles: TStrings;
     TabsToClose: TStringList;
+    AppsToMinimize: TStringList;
+    ServicesToStop: TStringList;
     FAppVersion: string;
     FNewVersion: string;
     function GetSettingsFromUrl: string;
@@ -29,6 +31,7 @@ type
     procedure ShowCaption;
     procedure DrawMessage(AText1, AText2: string);
     procedure CloseChromeTab;
+    procedure MinimizeApps;
   public
     LocalHeader: string;
     LocalClassName: string;
@@ -137,10 +140,12 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  FAppVersion := GetVersionAsString;
-  TabsToClose := TStringList.Create;
-  ExeNames    := TStringList.Create;
-  ExeTitles   := TStringList.Create;
+  FAppVersion    := GetVersionAsString;
+  TabsToClose    := TStringList.Create;
+  ExeNames       := TStringList.Create;
+  ExeTitles      := TStringList.Create;
+  AppsToMinimize := TStringList.Create;
+  ServicesToStop := TStringList.Create;
   LoadParams;
 end;
 
@@ -189,39 +194,64 @@ procedure TMainForm.LoadParams(ASilent: Boolean = True);
       end;
     end;
   end;
-  procedure LFillTabsAndExeToClose(AStrings: TStringList);
+//  procedure LFillTabsAndExeToClose(AStrings: TStringList);
+//  var
+//    i: Integer;
+//    lTabsStarted: Boolean;
+//  begin
+//    TabsToClose.Clear;
+//    ExeNames.Clear;
+//    ExeTitles.Clear;
+//    lTabsStarted := False;
+//    for i := 0 to AStrings.Count - 1 do
+//    begin
+//      if AStrings[i] = '' then
+//        Continue;
+//
+//      if (lTabsStarted and (Pos('-- ', AStrings[i]) = 1)) then
+//        Exit;
+//      if (AStrings[i] = C_CHROME_TABS_MARKER) then
+//      begin
+//        lTabsStarted := True;
+//        Continue; // skip this line
+//      end;
+//      if not lTabsStarted then // fill Exe's
+//      begin
+//        if (AStrings[i] > '') then
+//        begin
+//          if (RightStr(AStrings[i], 4) = '.exe') then
+//            ExeNames.Add(AStrings[i])
+//          else
+//            ExeTitles.Add(AStrings[i]);
+//        end;
+//        Continue;
+//      end;
+//      TabsToClose.Add(AStrings[i]);
+//    end;
+//  end;
+  procedure LFillAppsList(AStrings: TStrings; AMarker: String; AListToPopulate: TStrings; ASuffix: string = '');
   var
     i: Integer;
     lTabsStarted: Boolean;
   begin
-    TabsToClose.Clear;
-    ExeNames.Clear;
-    ExeTitles.Clear;
+    AListToPopulate.Clear;
     lTabsStarted := False;
     for i := 0 to AStrings.Count - 1 do
     begin
       if AStrings[i] = '' then
         Continue;
-
       if (lTabsStarted and (Pos('-- ', AStrings[i]) = 1)) then
-        Exit;
-      if (AStrings[i] = C_CHROME_TABS_MARKER) then
+        Exit;   //populate finished, new section started
+      if (AStrings[i] = AMarker) then
       begin
         lTabsStarted := True;
         Continue; // skip this line
       end;
-      if not lTabsStarted then // fill Exe's
+      if lTabsStarted then
       begin
-        if (AStrings[i] > '') then
-        begin
-          if (RightStr(AStrings[i], 4) = '.exe') then
-            ExeNames.Add(AStrings[i])
-          else
-            ExeTitles.Add(AStrings[i]);
-        end;
-        Continue;
+        if (ASuffix <> '') or (RightStr(AStrings[i], Length(ASuffix)) = ASuffix) then
+          AListToPopulate.Add(AStrings[i]);
       end;
-      TabsToClose.Add(AStrings[i]);
     end;
   end;
 var
@@ -237,7 +267,13 @@ begin
   try
     lStrings.Text := lReply;
 
-    LFillTabsAndExeToClose(lStrings);
+//    LFillTabsAndExeToClose(lStrings);
+    LFillAppsList(lStrings, C_CLOSE_APP_MARKER, ExeNames, '.exe');
+    LFillAppsList(lStrings, C_CLOSE_APP_MARKER, ExeTitles);
+    LFillAppsList(lStrings, C_CHROME_TABS_MARKER, TabsToClose);
+    LFillAppsList(lStrings, C_MINIMIZE_APP_MARKER, AppsToMinimize);
+    LFillAppsList(lStrings, C_SERVICES_LIST_MARKER, ServicesToStop);
+
     LGetNewVersionInfo(lStrings);
   finally
     FreeAndNil(lStrings);
@@ -264,6 +300,18 @@ begin
   ShowCaption;
 end;
 
+procedure TMainForm.MinimizeApps;
+var
+  i: Integer;
+  lAppTitle: string;
+begin
+  for i := 0 to AppsToMinimize.Count - 1 do
+  begin
+    lAppTitle := AppsToMinimize[i];
+    MinimizeAppByTitle(lAppTitle);
+  end;
+end;
+
 procedure TMainForm.ShowCaption;
 begin
   if Now > AllowedTime then
@@ -284,11 +332,11 @@ begin
 
   if Now > AllowedTime then
   begin
-//    KillTask(ExeName);
-//    KillTaskByTitle(ExeTitle);
     KillTasks(ExeNames);
     KillTasksByTitle(ExeTitles);
     CloseChromeTab;
+    MinimizeApps;
+    StopServices(ServicesToStop);
   end;
 end;
 
