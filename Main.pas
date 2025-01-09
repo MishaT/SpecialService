@@ -51,17 +51,20 @@ uses
 function EnumWindowsProc(wHandle: HWND; lb: TStringList): BOOL; stdcall;
 var
   Title, ClassName: array[0..255] of char;
+  position: Integer;
 begin
   GetWindowText(wHandle, Title, 255);
   GetClassName(wHandle, ClassName, 255);
   if IsWindowVisible(wHandle) then
   begin
-    if (Pos(MainForm.LocalClassName, string(ClassName)) > 0) and
-       (Pos(MainForm.LocalHeader, string(Title)) > 0)
-    then
+    if (Pos(MainForm.LocalClassName, string(ClassName)) > 0) then
     begin
-      SetForegroundWindow(wHandle);
-      SendCloseKey;
+      position := Pos(MainForm.LocalHeader, string(Title)); //need this variable to avoid optimization
+      if (position > 0) then
+      begin
+        SetForegroundWindow(wHandle);
+        SendCloseKey;
+      end;
     end;
   end;
   Result := True;
