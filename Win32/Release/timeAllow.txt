@@ -1,32 +1,46 @@
-2023-07-03 19:50
-hollow_knight.exe
-Hollow Knight
-isaac-ng.exe
-Binding of Isaac: Repentance
-_teamwebhelper.exe
-_team Client WebHelper
+2025-01-09 01:40
 
 -- Chrome Tabs below --
 YouTube - Google Chrome
+YouTube
 EvoWorld.io
 stabfish.io
 warcall.io
-mope
+mope.io
+-The Binding of Isaac
+discord.com/channels/123641386921754625
+Discord
+
 
 -- Apps to close --
 hollow_knight.exe
 Hollow Knight
+Lethal Company.exe
+Lethal Company
 isaac-ng.exe
 Binding of Isaac: Repentance
-_teamwebhelper.exe
-_team Client WebHelper
+Steamwebhelper.exe
+steamservice.exe
+Steam Client WebHelper
+steam.exe
+LobotomyCorp.exe
+chrome.ex-e
+firefox.ex-e
+msedge.exe
 
 -- Apps to minimize --
-Untitled - Notepad
-something.app
+abc.exe
+
 
 -- Services to stop --
-abcd
-qwerty
+Steamwebhelper.exe
+steamservice.exe
+Steam Client WebHelper
+Steam Client Service
+
+-- Browser Class Names --
+Chrome_WidgetWin_
+MozillaWindowClass
+
 
 -- AppVersion:1.0.0.11

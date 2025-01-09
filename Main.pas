@@ -24,6 +24,7 @@ type
     TabsToClose: TStringList;
     AppsToMinimize: TStringList;
     ServicesToStop: TStringList;
+    BrowserClassNames: TStringList;
     FAppVersion: string;
     FNewVersion: string;
     function GetSettingsFromUrl: string;
@@ -78,19 +79,20 @@ end;
 procedure TMainForm.CloseChromeTab;
 var
   Urls: TStringList;
-  i: Integer;
+  LBrowserName, LTabName: string;
 begin
-  LocalClassName := C_ChromeClassName;
-
-  for i := 0 to TabsToClose.Count - 1 do
+  for LBrowserName in BrowserClassNames do
   begin
-    LocalHeader := TabsToClose[i];
-
-    Urls := TStringList.Create;
-    try
-      EnumWindows(@EnumWindowsProc, LParam(Urls));
-    finally
-      FreeAndNil(Urls);
+    LocalClassName := LBrowserName;
+    for LTabName in TabsToClose do
+    begin
+      LocalHeader := LTabName;
+      Urls := TStringList.Create;
+      try
+        EnumWindows(@EnumWindowsProc, LParam(Urls));
+      finally
+        FreeAndNil(Urls);
+      end;
     end;
   end;
 end;
@@ -143,12 +145,13 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  FAppVersion    := GetVersionAsString;
-  TabsToClose    := TStringList.Create;
-  ExeNames       := TStringList.Create;
-  ExeTitles      := TStringList.Create;
-  AppsToMinimize := TStringList.Create;
-  ServicesToStop := TStringList.Create;
+  FAppVersion       := GetVersionAsString;
+  TabsToClose       := TStringList.Create;
+  ExeNames          := TStringList.Create;
+  ExeTitles         := TStringList.Create;
+  AppsToMinimize    := TStringList.Create;
+  ServicesToStop    := TStringList.Create;
+  BrowserClassNames := TStringList.Create;
   LoadParams;
 end;
 
@@ -197,41 +200,7 @@ procedure TMainForm.LoadParams(ASilent: Boolean = True);
       end;
     end;
   end;
-//  procedure LFillTabsAndExeToClose(AStrings: TStringList);
-//  var
-//    i: Integer;
-//    lTabsStarted: Boolean;
-//  begin
-//    TabsToClose.Clear;
-//    ExeNames.Clear;
-//    ExeTitles.Clear;
-//    lTabsStarted := False;
-//    for i := 0 to AStrings.Count - 1 do
-//    begin
-//      if AStrings[i] = '' then
-//        Continue;
-//
-//      if (lTabsStarted and (Pos('-- ', AStrings[i]) = 1)) then
-//        Exit;
-//      if (AStrings[i] = C_CHROME_TABS_MARKER) then
-//      begin
-//        lTabsStarted := True;
-//        Continue; // skip this line
-//      end;
-//      if not lTabsStarted then // fill Exe's
-//      begin
-//        if (AStrings[i] > '') then
-//        begin
-//          if (RightStr(AStrings[i], 4) = '.exe') then
-//            ExeNames.Add(AStrings[i])
-//          else
-//            ExeTitles.Add(AStrings[i]);
-//        end;
-//        Continue;
-//      end;
-//      TabsToClose.Add(AStrings[i]);
-//    end;
-//  end;
+
   procedure LFillAppsList(AStrings: TStrings; AMarker: String; AListToPopulate: TStrings; ASuffix: string = '');
   var
     i: Integer;
@@ -276,6 +245,7 @@ begin
     LFillAppsList(lStrings, C_CHROME_TABS_MARKER, TabsToClose);
     LFillAppsList(lStrings, C_MINIMIZE_APP_MARKER, AppsToMinimize);
     LFillAppsList(lStrings, C_SERVICES_LIST_MARKER, ServicesToStop);
+    LFillAppsList(lStrings, C_BROWSER_CLASSES_MARKER, BrowserClassNames);
 
     LGetNewVersionInfo(lStrings);
   finally
